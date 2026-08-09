@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Job Assistant</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f8fafc;
+            color: #172033;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .description {
+            margin: 8px 0 22px;
+            color: #667085;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .upload-area {
+            display: block;
+            padding: 24px 16px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            background: #ffffff;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #2563eb;
+            background: #f8fbff;
+        }
+
+        .upload-icon {
+            display: block;
+            margin-bottom: 10px;
+            color: #2563eb;
+            font-size: 28px;
+        }
+
+        .upload-title {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .upload-hint {
+            display: block;
+            margin-top: 6px;
+            color: #667085;
+            font-size: 12px;
+        }
+
+        #cvInput {
+            display: none;
+        }
+
+        .formats {
+            margin: 10px 0 14px;
+            color: #667085;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        #extract {
+            width: 100%;
+            padding: 12px;
+            border: 0;
+            border-radius: 7px;
+            background: #2563eb;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        #extract:hover {
+            background: #1d4ed8;
+        }
+
+        #extract:disabled {
+            background-color: gray;
+        }
+
+        #status {
+            min-height: 20px;
+            margin-top: 14px;
+            color: #667085;
+            font-size: 12px;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        #result {
+            display: none;
+            margin-top: 16px;
+            padding: 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #ffffff;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        #result.show {
+            display: block;
+        }
+
+        #result.loading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #667085;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #cbd5e1;
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Job Assistant</h1>
+
+    <p class="description">
+        Upload your CV and extract its text for job analysis.
+    </p>
+
+    <label class="upload-area" for="cvInput">
+        <span class="upload-icon">↑</span>
+        <span class="upload-title" id="uploadTitle">Choose your CV</span>
+        <span class="upload-hint" id="uploadHint">Click here to select a file</span>
+
+        <input id="cvInput" type="file" accept=".pdf,.doc,.docx" />
+    </label>
+
+    <p class="formats">
+        Supported formats: PDF, DOC, DOCX
+    </p>
+
+    <button id="extract" type="button">
+        Extract text
+    </button>
+
+    <div id="status" role="status" aria-live="polite"></div>
+
+    <div id="result"></div>
+
+    <script type="module" src="popup.js"></script>
+</body>
+
+</html>

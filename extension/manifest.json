@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Job Text Extractor",
+  "version": "1.0.0",
+  "description": "Extracts visible text from the current page.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage", 
+    "sidePanel"
+  ],
+  "action": {
+        "default_title": "Open Job Assistant"
+    },
+      "host_permissions": [
+        "<all_urls>"
+    ],
+
+    "side_panel": {
+        "default_path": "popup.html"
+    },
+
+    "background": {
+        "service_worker": "background.js"
+    }
+}
