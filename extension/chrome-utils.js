@@ -2,11 +2,21 @@ export const extractText = async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   console.log(tab);
 
+  const sites = {
+    linkedin: "linkedin",
+    dzobs: "dzobs",
+    helloworld: "helloworld",
+  };
+
+  const site = Object.keys(sites).find((domain) => tab.url?.includes(domain));
+
+  console.log("Ovo je sajt", site);
+
   const [{ result: text }] = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     func: () => document.body.innerText,
   });
 
   // console.log(text);
-  return text;
+  return { text: text, site: site };
 };

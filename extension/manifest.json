@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Job Text Extractor",
+  "name": "Job Finder Assistant",
   "version": "1.0.0",
   "description": "Extracts visible text from the current page.",
   "permissions": [
@@ -9,12 +9,15 @@
     "storage", 
     "sidePanel"
   ],
+
   "action": {
         "default_title": "Open Job Assistant"
     },
       "host_permissions": [
-        "<all_urls>"
-    ],
+          "https://dzobs.com/posao/*",
+          "https://www.linkedin.com/jobs/*",
+          "https://helloworld.rs/posao/*"
+],
 
     "side_panel": {
         "default_path": "popup.html"

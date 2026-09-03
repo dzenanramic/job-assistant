@@ -16,9 +16,11 @@ const handleExtract = async () => {
     resultDiv.innerHTML =
       '<span class="spinner"></span><span>Waiting for analysis result...</span>';
 
-    const extractedText = await extractText();
+    const { text: extractedText, site } = await extractText();
 
-    const cleanText = normalizeText(extractedText);
+    const cleanText = normalizeText(extractedText, site);
+
+    console.log(cleanText);
 
     const sendText = await sendTextToApi(cleanText, cvText);
 
