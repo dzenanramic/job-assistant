@@ -1,7 +1,4 @@
-import { marked } from "./node_modules/marked/lib/marked.esm.js";
-import DOMPurify from "./node_modules/dompurify/dist/purify.es.mjs";
-
-const API_URL = "http://localhost:3000/jobs";
+const API_URL = "http://127.0.0.1:8000/jobs";
 
 export const sendTextToApi = async (text, cvText) => {
   let payload = { text: text, cvText: cvText };
@@ -13,7 +10,7 @@ export const sendTextToApi = async (text, cvText) => {
   });
 
   const result = await response.json();
-  //   console.log(result);
-  const purifiedText = DOMPurify.sanitize(marked.parse(result.text));
-  return [purifiedText];
+  console.log("THIS IS RESULT IN SENDTEXTTOAPI", result);
+  // const purifiedText = DOMPurify.sanitize(marked.parse(result));
+  return result;
 };

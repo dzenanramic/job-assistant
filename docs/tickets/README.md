@@ -1,52 +1,85 @@
-# Job Assistant — Engineering Backlog (Jira Tickets)
+# Job Assistant — Backlog
 
-This backlog describes the work needed to take the **Job Assistant** MVP (Chrome extension +
-NestJS backend + DeepSeek AI) from a personal MVP to a product that reads well on a CV and
-survives a technical interview.
+Jira-style tickets for the **Job Assistant**: a Chrome extension plus a FastAPI backend that
+compares a job ad against a CV using an LLM (DeepSeek) and returns a fit analysis.
 
-## How to use these tickets
+## What exists today
 
-- Each file is a Jira-style ticket. Copy the fields (`Summary`, `Description`, `Acceptance
-  Criteria`, etc.) straight into your tracker (Jira, Linear, GitHub Projects, Trello).
-- Tickets are grouped under **Epics**. The epic ID shown is a proposal to structure the work.
-- **No code is provided and nothing is implemented** — these are only scope/requirements
-  tickets for you (or a future employer) to implement.
+| Part | Tech | State |
+|------|------|-------|
+| `extension/` | Chrome MV3, vanilla JS, pdf.js | Working: side panel, page scrape, PDF parse, API call, results UI |
+| `backend/` | FastAPI, Pydantic, OpenAI SDK | Working: one endpoint `POST /jobs`, DeepSeek call, injection guard |
 
-## Epic map
+**Current flow**
 
-| Epic | Theme | Why it matters on a CV |
-|------|-------|------------------------|
-| `MS` | Multi-site / multi-tenant support | Shows real system design: per-site extraction, tenants, database, billing-grade isolation |
-| `SEC` | Security & prompt-injection defense | Shows you think like a security engineer about ML/AI systems |
-| `OBS` | Observability, logging, errors | Production engineering, not just a demo |
-| `PERF` | Performance & rate limiting | Shows you care about abuse protection and cost control |
-| `DATA` | Data model & persistence | Moves from "return value in memory" to a real domain model |
-| `QA` | Testing & CI/CD | The single biggest CV and interview differentiator |
-| `EXT` | Extension UX robustness | Polish the shipped product |
-| `ARCH` | Architecture & tech hygiene | Makes the codebase maintainable and demonstrable |
+1. User uploads a CV PDF → parsed **in the browser** by pdf.js → kept in memory as `cvText`.
+2. User clicks Analyze → extension scrapes `document.body.innerText` from the active tab.
+3. `normalizeText()` trims the scrape using per-site start/end markers.
+4. `POST /jobs` with `{ text, cvText }`.
+5. Backend runs a prompt-injection check (TypeSafe), then asks DeepSeek for JSON.
+6. Extension renders score, strengths, gaps, suggestions, flags.
 
-## Suggested ordering (priority: high → lower)
+## Status legend
 
-1. **MS-001** Multi-site extensible extraction engine (the explicit ask)
-2. **SEC-001 / SEC-002** Prompt-injection defense (the explicit ask)
-3. **DATA-001** Persistence layer + real domain entity (enables MS/security)
-4. **QA-001** Meaningful automated tests (interviews will ask about this)
-5. **SEC-005** Auth & tenant isolation if/once real accounts exist
-6. The rest as a polish pass.
+| Status | Meaning |
+|--------|---------|
+| `DONE` | Implemented and verifiable in the current code |
+| `PARTIAL` | Some acceptance criteria met, the rest not |
+| `PLANNED` | No code exists yet — scope and acceptance criteria only |
 
-## Current-state findings (baseline this backlog was written against)
+## Ticket index
 
-- **Backend** (`backend/`): NestJS 11. Single `JobsModule`. `POST /jobs` sends `{ text, cvText }`
-  straight into the DeepSeek prompt. No validation pipe, no DTO decorators, no persistence
-  (no DB), no ORM, no auth, no rate limiting, `app.enableCors()` open to all origins, model/config
-  hardcoded in `.env` read directly (not via `@nestjs/config` or validation). CRUD stubs return
-  placeholder strings.
-- **Extension** (`extension/`): Manifest V3 side-panel. Reads `document.body.innerText` of the
-  active tab (site-agnostic, single hardcoded marker "prijavi se"), takes PDF CV text, posts to a
-  hardcoded `http://localhost:3000/jobs`, sanitizes the AI markdown with DOMPurify before render.
-  Only PDF is actually parsed; DOC/DOCX is advertised in the UI but unsupported.
+Work top to bottom. **P0 blocks the demo** — if a reviewer runs the project and one of these
+fires, everything else stops mattering.
 
----
+| ID | Title | Priority | Status |
+|----|-------|----------|--------|
+| [BE-001](BE/BE-001.md) | Fix import paths so the app actually boots | P0 | `PLANNED` |
+| [BE-002](BE/BE-002.md) | Never crash on bad model output; return a clean error contract | P0 | `PLANNED` |
+| [BE-003](BE/BE-003.md) | Remove debug `print()` calls; add structured logging | P0 | `PLANNED` |
+| [BE-004](BE/BE-004.md) | Request validation and size limits | P1 | `PLANNED` |
+| [BE-005](BE/BE-005.md) | Rate limiting and a daily spend cap | P1 | `PLANNED` |
+| [BE-006](BE/BE-006.md) | Lock down CORS | P1 | `PLANNED` |
+| [BE-007](BE/BE-007.md) | Config and secrets hygiene | P1 | `PLANNED` |
+| [BE-008](BE/BE-008.md) | Make the injection guard correct and resilient | P1 | `PLANNED` |
+| [BE-009](BE/BE-009.md) | Single source of truth for response models | P2 | `PLANNED` |
+| [BE-010](BE/BE-010.md) | Request correlation and token/cost tracking | P2 | `PLANNED` |
+| [BE-011](BE/BE-011.md) | API documentation and a health endpoint | P2 | `PLANNED` |
+| [EXT-001](EXT/EXT-001.md) | Handle unsupported, empty, and oversized CV files | P1 | `PLANNED` |
+| [EXT-002](EXT/EXT-002.md) | Stop injecting model text with `innerHTML` | P1 | `PLANNED` |
+| [EXT-003](EXT/EXT-003.md) | Detect API failures instead of rendering `undefined` | P1 | `PLANNED` |
+| [EXT-004](EXT/EXT-004.md) | Warn when the page is not a supported job site | P1 | `PLANNED` |
+| [EXT-005](EXT/EXT-005.md) | Make the backend URL configurable | P2 | `PLANNED` |
+| [EXT-006](EXT/EXT-006.md) | Re-analyze without re-uploading the CV | P2 | `PLANNED` |
+| [EXT-007](EXT/EXT-007.md) | Remove dead dependencies and add a build step | P2 | `PLANNED` |
+| [EXT-008](EXT/EXT-008.md) | Site adapter registry with a generic fallback | P3 | `PLANNED` |
+| [QA-001](QA/QA-001.md) | Backend test suite | P1 | `PLANNED` |
+| [QA-002](QA/QA-002.md) | CI pipeline on every push | P1 | `PLANNED` |
+| [QA-003](QA/QA-003.md) | Prompt-injection regression suite | P2 | `PLANNED` |
+| [QA-004](QA/QA-004.md) | Extension tests | P3 | `PLANNED` |
+| [DOC-001](DOC/DOC-001.md) | Rewrite the READMEs to match reality | P0 | `PLANNED` |
+| [ARCH-001](ARCH/ARCH-001.md) | Restructure the backend package | P1 | `PLANNED` |
+| [ARCH-002](ARCH/ARCH-002.md) | Docker Compose for one-command startup | P2 | `PLANNED` |
+| [ARCH-003](ARCH/ARCH-003.md) | Deploy the backend and publish the extension | P3 | `PLANNED` |
+| [MOB-001](MOB/MOB-001.md) | Web client foundation and shared contract | P2 | `PLANNED` |
+| [MOB-002](MOB/MOB-002.md) | CV upload and parsing on the backend | P2 | `PLANNED` |
+| [MOB-003](MOB/MOB-003.md) | Analyze from a pasted job URL | P3 | `PLANNED` |
+| [MOB-004](MOB/MOB-004.md) | Auth for public clients | P3 | `PLANNED` |
+| [MOB-005](MOB/MOB-005.md) | Analysis history | P3 | `PLANNED` |
 
-Generated as ticket documentation only. See `MS/`, `SEC/`, `OBS/`, `PERF/`, `DATA/`, `QA/`,
-`EXT/`, `ARCH/` subfolders for the ticket bodies.
+**Totals: 32 tickets — 0 done, 0 partial, 32 planned.**
+
+## Priorities
+
+| Priority | Meaning |
+|----------|---------|
+| **P0** | The project is broken or misleading without it. Do first. |
+| **P1** | Correctness or safety problem a reviewer will find. |
+| **P2** | Makes it look like a real product. |
+| **P3** | Nice to have; do after the rest. |
+
+## Ticket template
+
+Each ticket has: Type, Epic, Affects, Priority, Status, Summary, Current behaviour, Why it matters,
+Proposed scope, Acceptance criteria, and Notes. Tickets describe **target state**, not current
+state — the Status field is what tells you whether the code exists.

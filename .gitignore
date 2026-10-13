@@ -1,7 +1,39 @@
+# --- dependencies ---
 node_modules
 **/node_modules
+
+# --- python ---
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# --- build / test / lint output ---
 dist
+build/
 coverage
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# --- environment & secrets ---
+# A bare `.env` matches at any depth, so this covers backend/.env too.
 .env
+# Cover environment-specific variants, but never hide the committed example.
+.env.*
+!.env.example
+
+# --- misc ---
 *.log
 .DS_Store
+
+# --- personal study workspace (kept local, not part of the product) ---
+MISSION.md
+NOTES.md
+RESOURCES.md
+lessons/
+reference/
+learning-records/
+assets/
+

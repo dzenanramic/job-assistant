@@ -1,33 +1,50 @@
-# ARCH-002 — Structured project layout + dependency hygiene
+# ARCH-002 — Docker Compose for one-command startup
 
-**Type:** Tech debt / Architecture
-**Epic:** ARCH — Architecture & tech hygiene
-**Affects:** repo-level
+**Type:** DX / DevOps
+**Epic:** ARCH — Architecture & delivery
+**Affects:** repo root, `backend/`
 **Priority:** P2
+**Status:** `PLANNED`
 
 ## Summary
-The backend mixes responsibilities in single files (`jobs.service.ts` holds the AI prompt, parsing,
-and calls; config is read inline; the root `app.controller`/`app.service` hold a leftover demo
-`POST /` handler). The codebase grew as an MVP; a clean, conventional layout makes it much easier
-to demo and to extend, and it signals engineering maturity.
+Running the project requires installing Python 3.10+, `uv`, and Node, then following manual steps in
+the right order with the right working directory — which is exactly the class of setup that breaks
+for a reviewer.
+
+## Current behaviour
+There is no container configuration, no Makefile, and no single startup command. The documented
+setup involves backend `uv` setup plus extension `npm install` plus manual Chrome steps, and the
+documented commands are currently wrong anyway (BE-001, DOC-001).
+
+## Why it matters
+"One command and it runs" removes the largest source of friction between a reviewer and your
+project. It also demonstrates packaging and environment-parity thinking, which is a standard
+backend interview topic.
 
 ## Proposed scope
-- **Remove the leftover demo endpoint** (`app.controller.ts` `POST /` that just logs — it's a
-  debug relic and an unnecessary open surface).
-- Reorganize into explicit layers: `controllers → services → repositories`, `dto/`, `entities/`,
-  and `openai/` (or `ai/`) isolated behind an interface so the DeepSeek call is swappable and
-  mockable in tests (QA-001).
-- Move the AI **prompt building** out of the service into a dedicated module/builder so it's
-  testable and per-tenant (MS-002).
-- Confirm `@nestjs/config`, `class-validator`, `class-transformer` are declared as real
-  dependencies when used (currently `mapped-types` is `*`).
+- Add a `backend/Dockerfile`: a slim Python base, `uv` for dependency installation, a non-root user,
+  a `.dockerignore`, and a `HEALTHCHECK` hitting `GET /health` (BE-011).
+  Use a multi-stage build so build tooling does not ship in the final image.
+- Add `docker-compose.yml` at the root with a `backend` service: port mapping, env file, and a
+  healthcheck. Keep it minimal — there is no database yet.
+- Add a `Makefile` (or `justfile`) with the handful of commands a reviewer needs:
+  `make up`, `make test`, `make lint`, `make down`.
+- Add a `.env.example` alongside so `cp .env.example .env && make up` is the whole setup (BE-007).
+- Document the container path in the README as the **recommended** path, with the manual path kept
+  as an alternative for development.
+- Note clearly that the **extension is not containerised** — it is loaded into Chrome by hand — so
+  the reviewer knows what Compose does and does not cover.
+- Leave a commented-out `db` service placeholder referencing MOB-005, so the growth path is visible.
 
 ## Acceptance criteria
-- [ ] Demo `POST /` handler removed or clearly disabled.
-- [ ] AI provider behind an interface; prompt building in its own module.
-- [ ] Layered file/folder structure consistent across modules.
-- [ ] package.json dependencies reflect what is actually imported (no stale/`*` pins).
+- [ ] `cp .env.example .env && docker compose up` starts a working backend.
+- [ ] `/health` responds and the container healthcheck reports healthy.
+- [ ] The image runs as a non-root user and contains no build tooling or secrets.
+- [ ] `make test` and `make lint` run the same commands as CI (QA-002).
+- [ ] README documents the container path and the extension's manual step.
+- [ ] Build is reproducible and the image is reasonably small.
 
-## Notes / CV value
-Refactoring into a clean, layered architecture is a story recruiters hear well: "I took an MVP and
-made the architecture maintainable and swappable."
+## Notes
+Do this after BE-007 (config) and BE-011 (health), since the container depends on both. Do not add
+Kubernetes, multiple services, or a database to this — the value is in the simplicity, and
+over-engineering the deployment is a common own-goal in portfolio projects.

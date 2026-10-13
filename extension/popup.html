@@ -77,25 +77,67 @@
             text-align: center;
         }
 
+        /* ---------- Analyze button ---------- */
+
         #extract {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             width: 100%;
-            padding: 12px;
+            padding: 12px 16px;
             border: 0;
-            border-radius: 7px;
-            background: #2563eb;
+            border-radius: 9px;
+            background: linear-gradient(180deg, #3b76f6 0%, #2563eb 100%);
+            box-shadow: 0 1px 2px rgba(37, 99, 235, 0.35), 0 6px 16px -8px rgba(37, 99, 235, 0.7);
             color: #ffffff;
+            font-family: inherit;
             font-size: 14px;
             font-weight: 600;
+            letter-spacing: 0.01em;
             cursor: pointer;
+            transition: transform 0.12s ease, box-shadow 0.18s ease, filter 0.18s ease;
         }
 
-        #extract:hover {
-            background: #1d4ed8;
+        #extract:hover:not(:disabled) {
+            filter: brightness(1.06);
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.4), 0 10px 22px -8px rgba(37, 99, 235, 0.75);
+            transform: translateY(-1px);
         }
 
+        #extract:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(37, 99, 235, 0.35);
+        }
+
+        #extract:focus-visible {
+            outline: 2px solid #1d4ed8;
+            outline-offset: 2px;
+        }
+
+        /* Disabled = working (the handler only disables it while a request runs). */
         #extract:disabled {
-            background-color: gray;
+            background: #93b4f7;
+            box-shadow: none;
+            cursor: progress;
+            transform: none;
         }
+
+        /* Button spinner, shown only in the busy state. */
+        #extract .spinner {
+            display: none;
+            width: 14px;
+            height: 14px;
+            border-width: 2px;
+            border-color: rgba(255, 255, 255, 0.45);
+            border-top-color: #ffffff;
+        }
+
+        #extract:disabled .spinner {
+            display: block;
+        }
+
+        /* ---------- Status line ---------- */
 
         #status {
             min-height: 20px;
@@ -106,28 +148,149 @@
             text-align: center;
         }
 
+        /* ---------- Result card ---------- */
+
         #result {
             display: none;
-            margin-top: 16px;
-            padding: 14px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
+            margin-top: 18px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
             background: #ffffff;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px -12px rgba(15, 23, 42, 0.18);
             font-size: 13px;
             line-height: 1.6;
-            white-space: pre-wrap;
             word-break: break-word;
         }
 
         #result.show {
             display: block;
+            animation: result-in 0.25s ease-out both;
         }
 
         #result.loading {
+            display: block;
+            border-color: #e2e8f0;
+        }
+
+        /* Loading skeleton (default state, swapped out once .show is set). */
+        .result-loading {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #result.show .result-loading {
+            display: none;
+        }
+
+        .skeleton {
+            border-radius: 8px;
+            background: linear-gradient(90deg, #eef2f7 25%, #e2e8f0 37%, #eef2f7 63%);
+            background-size: 400% 100%;
+            animation: shimmer 1.4s ease-in-out infinite;
+        }
+
+        .skeleton-score {
+            width: 72px;
+            height: 30px;
+        }
+
+        .skeleton-line {
+            height: 32px;
+        }
+
+        .skeleton-line.short {
+            width: 70%;
+        }
+
+        #result.show .result-content {
+            display: block;
+        }
+
+        /* Result content is hidden until there is something to show. */
+        .result-content {
+            display: none;
+        }
+
+        #result h3 {
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: #667085;
+            gap: 8px;
+            margin: 0 0 10px;
+            color: #475569;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        /* Small accent bar in front of each heading. */
+        #result h3::before {
+            content: "";
+            width: 3px;
+            height: 12px;
+            border-radius: 2px;
+            background: #2563eb;
+            flex-shrink: 0;
+        }
+
+        /* Separate stacked sections with a hairline rule. */
+        #result h3:not(:first-child) {
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        #result ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        #result li {
+            position: relative;
+            margin-bottom: 8px;
+            padding: 9px 12px 9px 30px;
+            border-radius: 8px;
+            background: #f8fafc;
+            color: #1f2937;
+            text-wrap: pretty;
+        }
+
+        #result li:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Per-section accent dot on each list item. */
+        #result li::before {
+            content: "";
+            position: absolute;
+            top: 15px;
+            left: 12px;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #94a3b8;
+        }
+
+        /* Empty state: hide a list that has no items. */
+        #result ul:empty {
+            display: none;
+        }
+
+        #score {
+            margin: 0;
+            font-size: 30px;
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            color: #1d4ed8;
+        }
+
+        /* Panel width is narrow: keep the column stack tidy. */
+        #result>*:last-child {
+            margin-bottom: 0;
         }
 
         .spinner {
@@ -145,6 +308,35 @@
                 transform: rotate(360deg);
             }
         }
+
+        @keyframes shimmer {
+            to {
+                background-position: -200% 0;
+            }
+        }
+
+        @keyframes result-in {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            #result.show {
+                animation: none;
+            }
+
+            .skeleton {
+                animation: none;
+            }
+        }
     </style>
 </head>
 
@@ -160,20 +352,42 @@
         <span class="upload-title" id="uploadTitle">Choose your CV</span>
         <span class="upload-hint" id="uploadHint">Click here to select a file</span>
 
-        <input id="cvInput" type="file" accept=".pdf,.doc,.docx" />
+        <input id="cvInput" type="file" accept=".pdf" />
     </label>
 
     <p class="formats">
-        Supported formats: PDF, DOC, DOCX
+        Supported format: PDF
     </p>
 
     <button id="extract" type="button">
-        Extract text
+        <span class="spinner" aria-hidden="true"></span>
+        <span id="extractLabel">Analyze</span>
     </button>
 
     <div id="status" role="status" aria-live="polite"></div>
 
-    <div id="result"></div>
+    <div id="result">
+        <!-- Shown while the analysis request is in flight (popup.js swaps classNames). -->
+        <div class="result-loading">
+            <div class="skeleton skeleton-score"></div>
+            <div class="skeleton skeleton-line"></div>
+            <div class="skeleton skeleton-line short"></div>
+            <div class="skeleton skeleton-line"></div>
+        </div>
+
+        <div class="result-content">
+            <h3>Score</h3>
+            <p id="score"></p>
+            <h3>Strengths</h3>
+            <ul id="strengths"></ul>
+            <h3>Gaps</h3>
+            <ul id="gaps"></ul>
+            <h3>Suggestions</h3>
+            <ul id="suggestions"></ul>
+            <h3>Flags</h3>
+            <ul id="flags"></ul>
+        </div>
+    </div>
 
     <script type="module" src="popup.js"></script>
 </body>
